@@ -8,6 +8,7 @@ object MiniBuild extends Build {
     organization := "edu.berkeley.cs",
     scalaVersion := "2.11.7",
     libraryDependencies ++= Seq(
+      "edu.berkeley.cs" % "chisel-iotesters_2.11" % "1.2-SNAPSHOT",
       "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     ),
