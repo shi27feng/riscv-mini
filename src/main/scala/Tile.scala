@@ -8,7 +8,7 @@ import junctions._
 import freechips.rocketchip.config.Parameters
 
 class MemArbiter(implicit p: Parameters) extends Module {
-  val io = IO(new ParameterizedBundle {
+  val io = IO(new Bundle {
     val icache = Flipped(new NastiIO)
     val dcache = Flipped(new NastiIO)
     val nasti  =  new NastiIO
@@ -87,7 +87,7 @@ class MemArbiter(implicit p: Parameters) extends Module {
   }
 }
 
-class TileIO(implicit p: Parameters) extends ParameterizedBundle {
+class TileIO(implicit val p: Parameters) extends Bundle {
   val host  = new HostIO
   val nasti = new NastiIO
 }
