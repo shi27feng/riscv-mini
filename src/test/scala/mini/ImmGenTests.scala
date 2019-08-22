@@ -3,9 +3,9 @@
 package mini
 
 import chisel3._
-import chisel3.util._
 import chisel3.testers._
-import Control._
+import chisel3.util._
+import mini.Control._
 
 class ImmGenTester(imm: => ImmGen)(implicit p: freechips.rocketchip.config.Parameters) extends BasicTester with TestUtils {
   val dut = Module(imm)

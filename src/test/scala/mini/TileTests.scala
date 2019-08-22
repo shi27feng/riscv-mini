@@ -3,10 +3,10 @@
 package mini
 
 import chisel3._
-import chisel3.util._
 import chisel3.testers._
+import chisel3.util._
 import junctions._
-import TestParams._
+import mini.TestParams._
 
 class LatencyPipeIO[T <: Data](val gen: T) extends Bundle {
   val in = Flipped(Decoupled(gen))

@@ -4,8 +4,8 @@ package mini
 
 import chisel3._
 import chisel3.util._
+import freechips.rocketchip.config.{Field, Parameters}
 import junctions._
-import freechips.rocketchip.config.{Parameters, Field}
 
 case object NWays extends Field[Int]
 case object NSets extends Field[Int]

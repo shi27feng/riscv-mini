@@ -3,12 +3,13 @@
 package mini
 
 import chisel3._
-import chisel3.util._
 import chisel3.testers._
-import scala.reflect.ClassTag
-import scala.concurrent.{Future, Await, ExecutionContext}
-import Instructions._
+import chisel3.util._
+import mini.Instructions._
+
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.implicitConversions
+import scala.reflect.ClassTag
 
 trait DatapathTest
 object BypassTest extends DatapathTest {
@@ -217,8 +218,8 @@ abstract class IntegrationTests[T <: BasicTester : ClassTag](
     N: Int = 6) extends org.scalatest.FlatSpec {
   val dutName = implicitly[ClassTag[T]].runtimeClass.getSimpleName
   behavior of dutName
-  import scala.concurrent.duration._
   import ExecutionContext.Implicits.global
+  import scala.concurrent.duration._
 
   val results = testType.tests sliding (N, N) map { subtests =>
     val subresults = subtests map { test =>

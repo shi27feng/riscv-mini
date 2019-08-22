@@ -5,7 +5,6 @@ package mini
 import chisel3._
 import chisel3.util._
 import freechips.rocketchip.config.Parameters
-import scala.collection.immutable.ListMap
 
 object CSR {
   val N = 0.U(3.W)
@@ -212,7 +211,7 @@ class CSR(implicit val p: Parameters) extends Module with CoreParams {
   val wdata     = MuxLookup(io.cmd, 0.U, Seq(
     CSR.W -> io.in,
     CSR.S -> (io.out | io.in),
-    CSR.C -> (io.out & ~io.in)
+    CSR.C -> (io.out & (~io.in).asUInt)
   ))
   val iaddrInvalid = io.pc_check && io.addr(1)
   val laddrInvalid = MuxLookup(io.ld_type, false.B, Seq(
@@ -222,7 +221,7 @@ class CSR(implicit val p: Parameters) extends Module with CoreParams {
   io.expt := io.illegal || iaddrInvalid || laddrInvalid || saddrInvalid ||
              io.cmd(1, 0).orR && (!csrValid || !privValid) || wen && csrRO || 
              (privInst && !privValid) || isEcall || isEbreak
-  io.evec := mtvec + (PRV << 6)
+  io.evec := mtvec + (PRV << 6).asUInt
   io.epc  := mepc
 
   // Counters
