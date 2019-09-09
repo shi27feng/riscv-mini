@@ -8,8 +8,8 @@ import chisel3.util._
 import mini.TestParams._
 
 class CoreTester(core: => Core,
-                 loadmem: Iterator[String],
-                 maxcycles: Long)
+                 loadmem: Iterator[String] = Iterator.empty,
+                 maxcycles: Long = 1000000L)
                 (implicit p: freechips.rocketchip.config.Parameters) extends BasicTester with HexUtils {
   val xlen = p(XLEN)
   val dut = Module(core)

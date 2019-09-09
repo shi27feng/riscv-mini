@@ -3,6 +3,7 @@ val commonSettings = Seq(
   crossScalaVersions := Seq("2.11.12", "2.12.4"),
   libraryDependencies ++= Seq(
     "edu.berkeley.cs" %% "chisel-testers2" % "0.1-SNAPSHOT",
+    "edu.berkeley.cs" %% "chisel-iotesters" % "1.3-SNAPSHOT",
     "org.scalatest" %% "scalatest" % "3.0.1"
   ),
   resolvers ++= Seq(

@@ -1,9 +1,11 @@
 package mini.unittest
 
+import _root_.mini._
+
 import chisel3._
 import chisel3.tester._
 import chisel3.tester.experimental.TestOptionBuilder._
-import mini.{ALU, ALUArea, MiniConfig}
+
 import org.scalatest._
 
 class AluUnitTest extends FreeSpec with ChiselScalatestTester {

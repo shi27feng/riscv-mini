@@ -7,8 +7,8 @@ import chisel3.util._
 import freechips.rocketchip.config.Parameters
 
 object Const {
-  val PC_START = 0x200
-  val PC_EVEC  = 0x100
+  val PC_START = BigInt(0x200)
+  val PC_EVEC  = BigInt(0x100)
 }
 
 class DatapathIO(implicit p: Parameters) extends CoreBundle()(p) {
