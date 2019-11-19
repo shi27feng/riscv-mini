@@ -224,7 +224,7 @@ abstract class IntegrationTests[T <: BasicTester : ClassTag](
     val subresults = subtests map { test =>
       val stream = getClass.getResourceAsStream(s"/$test.hex")
       val loadmem = io.Source.fromInputStream(stream).getLines
-      Future(test -> (TesterDriver execute (() => tester(loadmem, testType.maxcycles))))
+      Future(test -> (TesterDriver.execute(() => tester(loadmem, testType.maxcycles), nameHint = Some(test))))
     }
     Await.result(Future.sequence(subresults), Duration.Inf)
   }
