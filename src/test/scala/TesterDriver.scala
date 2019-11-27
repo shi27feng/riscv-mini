@@ -9,6 +9,8 @@ import chisel3.experimental.RunFirrtlTransform
 import chisel3.stage.phases.AspectPhase
 import chisel3.stage.{ChiselCircuitAnnotation, ChiselStage, DesignAnnotation, NoRunFirrtlCompilerAnnotation}
 import chisel3.testers.BasicTester
+import firrtl.annotations.NoTargetAnnotation
+import firrtl.options.Unserializable
 import firrtl.transforms.BlackBoxSourceHelper.writeResourceToDirectory
 import firrtl.{Driver => _, _}
 import treadle.chronometry.Timer
@@ -16,24 +18,28 @@ import treadle.stage.TreadleTesterPhase
 import treadle.{TreadleTesterAnnotation, WriteVcdAnnotation}
 
 object TesterDriver extends BackendCompilationUtilities {
-  trait Backend
 
-  object VerilatorBackend extends Backend
-  object TreadleBackend extends Backend
+  trait Backend extends NoTargetAnnotation with Unserializable
+  case object VerilatorBackend extends Backend
+  case object TreadleBackend extends Backend
 
-//  val backends: Seq[Backend] = Seq(VerilatorBackend, TreadleBackend)
-  val backends: Seq[Backend] = Seq(TreadleBackend)
-//  val backends: Seq[Backend] = Seq(VerilatorBackend)
+//  val defaultBackend: Backend = TreadleBackend
+  val defaultBackend: Backend = VerilatorBackend
 
   /** For use with modules that should successfully be elaborated by the
     * frontend, and which can be turned into executables with assertions. */
-  def execute(t: () => BasicTester,
-                     additionalVResources: Seq[String] = Seq(),
-                     annotations: AnnotationSeq = Seq(),
-                     nameHint: Option[String] = None
-                    ): Boolean = {
+  def execute(t:                    () => BasicTester,
+              additionalVResources: Seq[String] = Seq(),
+              annotations:          AnnotationSeq = Seq(),
+              nameHint:             Option[String] = None): Boolean = {
 
-    backends.map {
+
+    val adjustedAnnotations: AnnotationSeq = if (annotations.exists(_.isInstanceOf[Backend])) {
+      annotations
+    } else {
+      annotations :+ defaultBackend
+    }
+    adjustedAnnotations.map {
       case TreadleBackend =>
         executeTreadle(t, additionalVResources, annotations, nameHint)
       case VerilatorBackend =>
@@ -42,15 +48,15 @@ object TesterDriver extends BackendCompilationUtilities {
   }
 
   /** For use with modules that should successfully be elaborated by the
-    * frontend, and which can be turned into executables with assertions. */
-  def executeVerilog(t: () => BasicTester,
-              additionalVResources: Seq[String] = Seq(),
-              annotations: AnnotationSeq = Seq(),
-              nameHint: Option[String] = None
-             ): Boolean = {
+    * frontend, and which can be turned into executables with assertions.
+    */
+  def executeVerilog(t:                    () => BasicTester,
+                     additionalVResources: Seq[String] = Seq(),
+                     annotations:          AnnotationSeq = Seq(),
+                     nameHint:             Option[String] = None): Boolean = {
     // Invoke the chisel compiler to get the circuit's IR
     val (circuit, dut) = new chisel3.stage.ChiselGeneratorAnnotation(finishWrapper(t)).elaborate.toSeq match {
-      case Seq(ChiselCircuitAnnotation(cir), d:DesignAnnotation[_]) => (cir, d)
+      case Seq(ChiselCircuitAnnotation(cir), d: DesignAnnotation[_]) => (cir, d)
     }
 
     // Set up a bunch of file handlers based on a random temp filename,
@@ -118,11 +124,10 @@ object TesterDriver extends BackendCompilationUtilities {
     }
   }
 
-  def executeTreadle(t: () => BasicTester,
-              additionalVResources: Seq[String] = Seq(),
-              annotations: AnnotationSeq = Seq(),
-              nameHint: Option[String] = None
-             ): Boolean = {
+  def executeTreadle(t:                    () => BasicTester,
+                     additionalVResources: Seq[String] = Seq(),
+                     annotations:          AnnotationSeq = Seq(),
+                     nameHint:             Option[String] = None): Boolean = {
     val generatorAnnotation = chisel3.stage.ChiselGeneratorAnnotation(t)
 
     // This provides an opportunity to translate from top level generic flags to backend specific annos
@@ -136,7 +141,7 @@ object TesterDriver extends BackendCompilationUtilities {
 
     val targetName = s"test_run_dir/${circuit.name}" + (nameHint match {
       case Some(hint) => s"_$hint"
-      case _ => ""
+      case _          => ""
     }) + "_treadle"
 
     annotationSeq = annotationSeq :+ TargetDirAnnotation(targetName)
@@ -165,25 +170,25 @@ object TesterDriver extends BackendCompilationUtilities {
         }
         treadleTester.step()
       }
-    }
-    catch {
+    } catch {
       case t: Throwable =>
     }
     treadleTester.finish
     treadleTester.report()
 
     treadleTester.getStopResult match {
-      case None => true
+      case None    => true
       case Some(0) => true
-      case _ => false
+      case _       => false
     }
   }
+
   /**
     * Calls the finish method of an BasicTester or a class that extends it.
     * The finish method is a hook for code that augments the circuit built in the constructor.
     */
-  def finishWrapper(test: () => BasicTester): () => BasicTester = {
-    () => {
+  def finishWrapper(test: () => BasicTester): () => BasicTester = { () =>
+    {
       val tester = test()
       tester.finish()
       tester
